@@ -68,6 +68,14 @@ class Perceptron(object):
         """Return class label after unit step"""
         return np.where(self.net_input(X) >= 0.0, 1, -1)
 
+    def accuracyCalc(self,ylabel,ypred):
+          count = 0
+          for yl, yp in zip(ylabel, ypred):
+              if yl == yp:
+                  count += 1
+          accuracy = float(count)/len(ylabel)
+          return accuracy
+
 
 # ### Reading-in the Iris data
 df = pd.read_csv('https://archive.ics.uci.edu/ml/''machine-learning-databases/iris/iris.data', header=None)
@@ -75,18 +83,17 @@ df = pd.read_csv('https://archive.ics.uci.edu/ml/''machine-learning-databases/ir
 def featureSelector(combination):
       """Helper Function which enables to select any 1 of the 4 possible features combinations which are:
 
-        Combination 1 - Features 0, 1 and 2
-        Combination 2 - Features 0, 2 and 3
-        Combination 3 - Features 1, 2 and 3
-        Combination 4 - Features 0, 1 and 3
+        Combination 1 - Features 1, 2 and 3
+        Combination 2 - Features 1, 3 and 4
+        Combination 3 - Features 2, 3 and 4
+        Combination 4 - Features 1, 2 and 4
 
         where;
-        feature  0 = "Sepal Length"
-        feature  1 = "Sepal Width"
-        feature  2 = "Petal Length"
-        feature  3 = "Petal Width"      
-      """
-      
+        feature  1 = "Sepal Length"
+        feature  2 = "Sepal Width"
+        feature  3 = "Petal Length"
+        feature  4 = "Petal Width"      
+      """      
       if combination == 1:
             X = df.iloc[0:100, [0, 1, 2]].values
       elif combination == 2:
@@ -100,41 +107,70 @@ def featureSelector(combination):
             return None
       return X
 
+
+# def predict(X):
+#         # if not hasattr(self, 'weights'):
+#         #     print('The model is not trained yet!')
+#         #     return
+        
+#         n_samples = X.shape[0]
+#         # Add column of 1s
+#         X = np.concatenate([X, np.ones((n_samples, ppn.w[0]))], axis=1)
+#         y = np.matmul(X, ppn.w)
+#         y = np.vectorize(lambda val: 1 if val > 0 else -1)(y)
+        
+#         return y
+
+# def score(X, y):
+#     pred_y = predict(X)
+
+#     return np.mean(y == pred_y)
 ppn = Perceptron(eta=0.1, n_iter=4)
 
 # select setosa and versicolor and assign -1 as class label if Setosa and 1 otherwise
 y = df.iloc[0:100, 4].values
 y = np.where(y == 'Iris-setosa', -1, 1)
 
+
+# Plots of all the different combinations' errors
 fig, axs = plt.subplots(2, 2)
 
-# Combination 1 (features 0-1-2) plot 
+# Combination 1 (Features 1-2-3) plot 
 x = featureSelector(1)
 ppn.fit(x, y)
+print("Combination 1 (features 1-2-3) errors :", ppn.errors)
+print("accuracy is :","{0:.0%}".format(ppn.accuracyCalc(y, ppn.predict(x))))
+print("accuracy other:", score(x,y))
 axs[0, 0].plot(range(1, len(ppn.errors) + 1), ppn.errors,marker='o')
 axs[0,0].set_ylim([-0.1, max(ppn.errors) + 0.1])
-axs[0, 0].set_title('Features 0-1-2')
+axs[0, 0].set_title('Features 1-2-3')
 
-# Combination 2 (features 0-2-3) plot 
+# Combination 2 (Features 1-3-4) plot 
 x = featureSelector(2)
 ppn.fit(x, y)
-axs[0, 1].plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o', color = 'r')#tab:orange'
+print("Combination 2 (features 1-3-4) errors :", ppn.errors)
+print("accuracy is :","{0:.0%}".format(ppn.accuracyCalc(y, ppn.predict(x))))
+axs[0, 1].plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o', color = 'r')
 axs[0,1].set_ylim([-0.1, max(ppn.errors) + 0.1])
-axs[0, 1].set_title('Features 0-2-3')
+axs[0, 1].set_title('Features 1-3-4')
 
-# Combination 3 (features 1-2-3) plot 
+# Combination 3 (Features 2-3-4) plot 
 x = featureSelector(3)
 ppn.fit(x, y)
-axs[1, 0].plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o' , color = 'g')#'tab:green'
+print("Combination 3 (features 2-3-4) errors :", ppn.errors)
+print("accuracy is :","{0:.0%}".format(ppn.accuracyCalc(y, ppn.predict(x))))
+axs[1, 0].plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o' , color = 'g')
 axs[1,0].set_ylim([-0.1, max(ppn.errors) + 0.1])
-axs[1, 0].set_title('Features 1-2-3')
+axs[1, 0].set_title('Features 2-3-4')
 
-# Combination 4 (features 0-1-3) plot 
+# Combination 4 (Features 1-2-4) plot 
 x = featureSelector(4)
 ppn.fit(x, y)
-axs[1, 1].plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o', color = 'm' )#'tab:red'
+print("Combination 4 (features 1-2-4) errors :", ppn.errors)
+print("accuracy is :","{0:.0%}".format(ppn.accuracyCalc(y, ppn.predict(x))))
+axs[1, 1].plot(range(1, len(ppn.errors) + 1), ppn.errors, marker='o', color = 'm' )
 axs[1,1].set_ylim([-0.1, max(ppn.errors) + 0.1])
-axs[1, 1].set_title('Features 0-1-3')
+axs[1, 1].set_title('Features 1-2-4')
 
 for ax in axs.flat:
     ax.set(xlabel='Epochs (Iterations)', ylabel='Number of Errors')
